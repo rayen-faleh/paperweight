@@ -1,0 +1,27 @@
+[package]
+name = "paperweight-mcp"
+description = "Paperweight's local MCP server (stdio). Lets an AI assistant add and manage deadlines."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "paperweight-mcp"
+path = "src/main.rs"
+
+[dependencies]
+paperweight-core.workspace = true
+rmcp = { workspace = true, features = ["server", "macros", "transport-io", "schemars"] }
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+chrono.workspace = true
+anyhow.workspace = true
+
+[dev-dependencies]
+rmcp = { workspace = true, features = ["client", "transport-async-rw"] }
+tempfile.workspace = true
