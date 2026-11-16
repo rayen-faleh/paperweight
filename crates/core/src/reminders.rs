@@ -238,7 +238,12 @@ pub fn evaluate(input: &Input) -> Outcome {
                     item_id: item.id.clone(),
                     title: item.title.clone(),
                     due_label: clock.due_label(item.due_at, item.all_day, now),
-                    offset: trig.offset.clone(),
+                    // The first overdue reminder, right at the deadline, reads "due now".
+                    offset: if trig.offset == "overdue" && now - item.due_at < Duration::hours(1) {
+                        "now".to_string()
+                    } else {
+                        trig.offset.clone()
+                    },
                 },
             )
         })
@@ -304,7 +309,12 @@ pub fn evaluate(input: &Input) -> Outcome {
 }
 
 fn single_body(l: &DeliveryLine) -> String {
+    let phrase = l
+        .due_label
+        .trim_start_matches("overdue (")
+        .trim_end_matches(')');
     match l.offset.as_str() {
+        "now" => format!("Due now — {phrase}"),
         "overdue" => format!(
             "Overdue — was due {}",
             l.due_label

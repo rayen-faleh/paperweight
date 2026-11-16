@@ -16,7 +16,7 @@
   async function load() {
     try {
       info = await api.getSettings();
-      s = structuredClone(info.settings);
+      s = $state.snapshot(info.settings);
       connect = await api.connectInfo();
       error = null;
     } catch (e) {
@@ -29,7 +29,7 @@
     if (!s) return;
     try {
       info = await api.saveSettings(s);
-      s = structuredClone(info.settings);
+      s = $state.snapshot(info.settings);
       i18n.lang = s.language;
       ui.shortcut = s.quick_add_shortcut;
       toast(t("settings.saved"));
@@ -342,6 +342,9 @@
   .buttons {
     display: flex;
     gap: 8px;
+  }
+  .card > button {
+    align-self: flex-start;
   }
   .ok {
     color: var(--ink-2);

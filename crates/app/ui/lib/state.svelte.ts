@@ -48,3 +48,8 @@ export function prettyShortcut(s: string): string {
     .replace(/Alt|Option/g, mac ? "⌥" : "Alt")
     .replace(/\+/g, mac ? "" : "+");
 }
+
+/** A calendar date in the interface language, e.g. "16 Nov 2026". */
+export function shortDate(iso: string, lang: string): string {
+  return new Date(iso).toLocaleDateString(lang === "ja" ? "ja-JP" : "en-GB", { day: "numeric", month: "short", year: "numeric" });
+}

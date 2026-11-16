@@ -742,3 +742,22 @@ fn quick_add_splits_title_and_date_with_the_same_parser() {
         "needs a title"
     );
 }
+
+#[test]
+fn finished_items_are_not_labelled_overdue() {
+    let (_d, mut s) = store();
+    let now = tue_afternoon();
+    let item = s
+        .add_item(NewItem::new("x", now - Duration::hours(2), false), now)
+        .unwrap();
+    let c = s.clock().unwrap();
+    assert!(
+        ItemView::new(item.clone(), &c, now)
+            .due_label
+            .starts_with("overdue")
+    );
+    let (done, _) = s.complete_item(&item.id, now).unwrap();
+    let v = ItemView::new(done, &c, now);
+    assert_eq!(v.due_label, "today 13:00");
+    assert!(!v.overdue);
+}

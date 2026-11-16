@@ -271,7 +271,12 @@ fn overdue_reminds_once_a_day() {
     // Tuesday 18:00: day reminder already went at noon digest; the overdue one at 18:00.
     let tue = run(&mut s, jst(2026, 11, 17, 12, 0), jst(2026, 11, 17, 23, 59));
     let offsets: Vec<String> = tue.iter().map(|(_, d)| d.lines[0].offset.clone()).collect();
-    assert_eq!(offsets, vec!["day", "overdue"]);
+    assert_eq!(offsets, vec!["day", "now"]);
+    assert!(
+        tue[1].1.body.starts_with("Due now — today 18:00"),
+        "{}",
+        tue[1].1.body
+    );
     assert_eq!(tue[1].0, jst(2026, 11, 17, 18, 0));
     // Wednesday: once, at noon (02:00 is inside quiet hours).
     let wed = run(&mut s, jst(2026, 11, 18, 0, 0), jst(2026, 11, 18, 23, 59));

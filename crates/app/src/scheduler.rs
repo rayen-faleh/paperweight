@@ -151,6 +151,12 @@ pub fn on_action(app: &AppHandle, performed: &ActionPerformed) {
     let item = item_of(app, performed);
     tracing::info!(action = performed.action_id(), item = ?item, "notification action");
     let state = app.state::<AppState>();
+    // The buttons did their job; take the notification off the screen.
+    if matches!(performed.action_id(), "done" | "snooze")
+        && let Some(n) = performed.notification()
+    {
+        let _ = app.notification().remove_active(vec![n.id()]);
+    }
     match (performed.action_id(), item) {
         ("done", Some(id)) => {
             if let Ok(mut store) = state.store()

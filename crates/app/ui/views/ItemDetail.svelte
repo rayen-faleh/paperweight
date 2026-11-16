@@ -1,7 +1,7 @@
 <script lang="ts">
   import { api, errorText, localTime, KINDS, type Changes, type Freq, type Item } from "../lib/api";
   import { i18n, t } from "../lib/i18n.svelte";
-  import { ui, toast, changed, dayName } from "../lib/state.svelte";
+  import { ui, toast, changed, dayName, shortDate } from "../lib/state.svelte";
 
   let { id }: { id: string } = $props();
 
@@ -129,6 +129,12 @@
     }
   }
 
+  function when(iso: string): string {
+    return new Date(iso).toLocaleString(i18n.lang === "ja" ? "ja-JP" : "en-GB", {
+      weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
+    });
+  }
+
   function dueText(it: Item): string {
     const day = dayName(it.due_day, i18n.lang, true);
     return it.all_day ? `${day} · ${t("row.allDay")}` : `${day} · ${localTime(it.due_local)}`;
@@ -157,7 +163,7 @@
     <div class="due" class:late={item.overdue}>
       <div>
         <div class="due-main">{dueText(item)}</div>
-        <div class="muted small">{item.due_label}</div>
+        {#if /^(today|tonight|tomorrow|overdue)/.test(item.due_label)}<div class="muted small">{item.due_label}</div>{/if}
       </div>
     </div>
 
@@ -179,7 +185,7 @@
         <button class="ghost danger" onclick={remove}>{t("detail.delete")}</button>
       </div>
       {#if item.snoozed && item.snoozed_until}
-        <p class="muted small">{t("detail.snoozedUntil", { time: new Date(item.snoozed_until).toLocaleString() })}</p>
+        <p class="muted small">{t("detail.snoozedUntil", { time: item.snoozed_until_label ?? when(item.snoozed_until) })}</p>
       {/if}
       {#if snoozeOpen}
         <div class="snooze">
@@ -290,7 +296,7 @@
 
     <p class="muted small foot">
       {t("detail.id", { id: item.id })}<br />
-      {t("detail.created", { date: new Date(item.created_at).toLocaleDateString() })}
+      {t("detail.created", { date: shortDate(item.created_at, i18n.lang) })}
     </p>
   {:else}
     <p class="muted">{t("common.loading")}</p>

@@ -283,10 +283,7 @@ fn describe(v: &ItemView) -> String {
     if v.snoozed {
         s.push_str(&format!(
             "; reminders snoozed until {}",
-            v.item
-                .snoozed_until
-                .map(|t| t.to_rfc3339())
-                .unwrap_or_default()
+            v.snoozed_until_label.clone().unwrap_or_default()
         ));
     }
     s
@@ -545,10 +542,7 @@ impl Paperweight {
                     "Snoozed reminders for {} \"{}\" until {}. The deadline is unchanged: {}.",
                     v.item.id,
                     v.item.title,
-                    v.item
-                        .snoozed_until
-                        .map(|t| t.to_rfc3339())
-                        .unwrap_or_default(),
+                    v.snoozed_until_label.clone().unwrap_or_default(),
                     v.due_label
                 ),
                 json!({ "item": v }),
@@ -860,7 +854,7 @@ impl ServerHandler for Paperweight {
                 let clock = settings.clock();
                 let routine = store.routine().map_err(s)?;
                 Ok(json!({
-                    "now_local": clock.local(now).to_rfc3339(),
+                    "now_local": paperweight_core::time::local_iso(&clock, now),
                     "timezone": clock.tz.name(),
                     "today": clock.today(now),
                     "weekday_numbering": "0 = Monday … 6 = Sunday; a block's weekday is the logical day, so a 22:00–02:00 block runs into the next calendar morning",

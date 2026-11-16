@@ -48,7 +48,7 @@ export const en = {
   "all.count": "{n} items",
 
   "detail.title": "Title",
-  "detail.due": "Due",
+  "detail.due": "Change the due date",
   "detail.duePlaceholder": "friday 17:00, 2026-11-20, in 3 days…",
   "detail.dueMeans": "Means: {label}",
   "detail.kind": "Kind",

@@ -115,6 +115,17 @@ impl Clock {
     /// Short human label for a deadline relative to `now`, e.g.
     /// "today", "tonight 01:00", "tomorrow 17:00", "Fri 21 Nov", "overdue (Mon 16 Nov)".
     pub fn due_label(&self, due: DateTime<Utc>, all_day: bool, now: DateTime<Utc>) -> String {
+        let base = self.due_phrase(due, all_day, now);
+        if due <= now {
+            format!("overdue ({base})")
+        } else {
+            base
+        }
+    }
+
+    /// Like [`Self::due_label`] without the "overdue" wrapper, for items that
+    /// are finished or archived.
+    pub fn due_phrase(&self, due: DateTime<Utc>, all_day: bool, now: DateTime<Utc>) -> String {
         let day = self.deadline_day(due);
         let today = self.today(now);
         let time = if all_day {
@@ -124,18 +135,12 @@ impl Clock {
         };
         let late_night = !all_day && self.local_naive(due).date() != day;
         let diff = (day - today).num_days();
-        let base = match diff {
+        match diff {
             0 if late_night => format!("tonight{time}"),
             0 => format!("today{time}"),
             1 if late_night => format!("tomorrow night{time}"),
             1 => format!("tomorrow{time}"),
-            2..=6 => format!("{}{}", day.format("%a %-d %b"), time),
             _ => format!("{}{}", day.format("%a %-d %b"), time),
-        };
-        if due <= now {
-            format!("overdue ({base})")
-        } else {
-            base
         }
     }
 }
@@ -171,4 +176,9 @@ pub fn parse_utc(s: &str) -> Option<DateTime<Utc>> {
 /// Truncate to whole seconds, matching storage precision.
 pub fn trunc(t: DateTime<Utc>) -> DateTime<Utc> {
     DateTime::from_timestamp(t.timestamp(), 0).unwrap_or(t)
+}
+
+/// Local time as ISO 8601 with offset, to the second: `2026-11-16T23:34:38+09:00`.
+pub fn local_iso(clock: &Clock, t: DateTime<Utc>) -> String {
+    clock.local(t).format("%Y-%m-%dT%H:%M:%S%:z").to_string()
 }

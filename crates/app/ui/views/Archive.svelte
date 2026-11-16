@@ -1,7 +1,7 @@
 <script lang="ts">
   import { api, errorText, type Item } from "../lib/api";
-  import { t } from "../lib/i18n.svelte";
-  import { ui, toast, changed } from "../lib/state.svelte";
+  import { i18n, t } from "../lib/i18n.svelte";
+  import { ui, toast, changed, shortDate } from "../lib/state.svelte";
 
   let items = $state<Item[]>([]);
   let error = $state<string | null>(null);
@@ -40,7 +40,7 @@
             <div class="title">{item.title}</div>
             <div class="muted small">
               {t(`kind.${item.kind}`)} · {item.due_label.replace(/^overdue \((.*)\)$/, "$1")}
-              {#if item.archived_at} · {t("archive.deletedOn", { date: new Date(item.archived_at).toLocaleDateString() })}{/if}
+              {#if item.archived_at} · {t("archive.deletedOn", { date: shortDate(item.archived_at, i18n.lang) })}{/if}
             </div>
           </div>
           <button onclick={() => restore(item)}>{t("archive.restore")}</button>

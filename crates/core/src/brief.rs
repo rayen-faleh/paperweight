@@ -21,17 +21,27 @@ pub struct ItemView {
     pub due_label: String,
     pub overdue: bool,
     pub snoozed: bool,
+    /// When an active snooze ends, as a local phrase ("tomorrow 12:00").
+    pub snoozed_until_label: Option<String>,
     pub steps_done: usize,
     pub requirements_done: usize,
 }
 
 impl ItemView {
     pub fn new(item: Item, clock: &Clock, now: DateTime<Utc>) -> Self {
-        let due_local = clock.local(item.due_at).to_rfc3339();
+        let due_local = crate::time::local_iso(clock, item.due_at);
         let due_day = clock.deadline_day(item.due_at);
-        let due_label = clock.due_label(item.due_at, item.all_day, now);
+        let due_label = if item.status == Status::Open {
+            clock.due_label(item.due_at, item.all_day, now)
+        } else {
+            clock.due_phrase(item.due_at, item.all_day, now)
+        };
         let overdue = item.status == Status::Open && item.due_at <= now;
         let snoozed = item.is_snoozed(now);
+        let snoozed_until_label = item
+            .snoozed_until
+            .filter(|_| snoozed)
+            .map(|t| clock.due_phrase(t, false, now));
         let steps_done = item.steps.iter().filter(|s| s.done).count();
         let requirements_done = item.requirements.iter().filter(|r| r.done).count();
         ItemView {
@@ -41,6 +51,7 @@ impl ItemView {
             due_label,
             overdue,
             snoozed,
+            snoozed_until_label,
             steps_done,
             requirements_done,
         }
@@ -113,7 +124,7 @@ pub fn brief(items: Vec<Item>, clock: &Clock, now: DateTime<Utc>) -> Brief {
     sort_by_priority(&mut due_today);
     sort_by_priority(&mut next);
     Brief {
-        now_local: clock.local(now).to_rfc3339(),
+        now_local: crate::time::local_iso(clock, now),
         timezone: clock.tz.name().to_string(),
         today,
         day_rollover: clock.rollover.format("%H:%M").to_string(),

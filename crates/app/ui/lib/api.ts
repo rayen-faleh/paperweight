@@ -32,6 +32,7 @@ export interface Item {
   due_label: string;
   overdue: boolean;
   snoozed: boolean;
+  snoozed_until_label: string | null;
   steps_done: number;
   requirements_done: number;
 }
