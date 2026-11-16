@@ -17,6 +17,7 @@ Every place this build deviates from the original brief, and every choice the br
 - **The calendar feed's HTTP server lives in `core`.** It is about 100 lines of std-only code, so core has no HTTP dependency and the feed is testable without Tauri. The app only starts and stops it. It opens the database fresh for each request.
 - **The Claude Desktop config logic also lives in `core`** (`connect.rs`). It touches no database; it lives there so it can be tested without building Tauri.
 - **No plugin APIs are exposed to the web view.** The capability grants only `core:default`. Notifications, dialogs, autostart and shortcuts are called from Rust commands, which keeps the frontend down to one runtime dependency (`@tauri-apps/api`).
+- **Write transactions use `BEGIN IMMEDIATE`.** A deferred transaction that reads and then writes cannot wait for the write lock: if another connection committed in between, SQLite returns "database is locked" at once and ignores `busy_timeout`. That happened in real use when an assistant sent two `add_item` calls in parallel. Taking the lock up front makes concurrent writers queue behind the 5-second busy timeout instead.
 - **Logs.** The MCP server logs only to stderr, and `#![deny(clippy::print_stdout)]` guards against stray prints. The app logs to stderr and to `paperweight.log` next to the database.
 
 ## Data model and dates
@@ -47,6 +48,7 @@ Every place this build deviates from the original brief, and every choice the br
 - **Catch-up.** The first check after the app starts, or a check more than 3 minutes after the previous one (sleep or shutdown), sends one "While you were away" digest.
 - **Quiet hours with the same start and end** mean no quiet hours.
 - **Done and Snooze buttons are on all three desktops.** tauri-plugin-notification 2.8.1 documents desktop support for action buttons and click (`tap`) reporting on Linux, Windows and macOS when an `on_action` handler is registered. **Snooze till tomorrow** snoozes until the end of tomorrow's quiet hours (12:00 by default). After Done or Snooze the app removes the notification (the plugin supports this on Linux; elsewhere it is a no-op).
+- **Sound.** Reminders play the system's own sound: "Reminder" on Windows, "Glass" on macOS, and the freedesktop theme sound `message-new-instant` on Linux (sent as the `sound-name` hint, which the desktop's notification server may or may not play). A **Play a sound** setting, on by default, turns this off. It is needed because without a sound name, Windows toasts are generated as `<audio silent="true"/>`.
 - **Tray count.** The icon is drawn at runtime with a numeric badge, because Windows trays cannot show text next to an icon. On macOS and Linux the count is also set as the tray title. The tooltip is set too, but libayatana-appindicator does not show tooltips.
 
 ## Planner

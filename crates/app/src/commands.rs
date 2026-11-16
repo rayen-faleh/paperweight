@@ -422,7 +422,8 @@ pub fn connect_claude_desktop() -> Res<ConnectOutcome> {
 }
 
 #[tauri::command]
-pub fn test_notification(app: AppHandle) -> Res<()> {
+pub fn test_notification(app: AppHandle, state: State<AppState>) -> Res<()> {
+    let sound = state.store()?.settings().map_err(e)?.reminder_sound;
     crate::scheduler::deliver(
         &app,
         &paperweight_core::reminders::Delivery {
@@ -432,6 +433,7 @@ pub fn test_notification(app: AppHandle) -> Res<()> {
             item_id: None,
             lines: vec![],
         },
+        sound,
     );
     Ok(())
 }

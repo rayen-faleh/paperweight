@@ -140,6 +140,8 @@ export const en = {
   "settings.timezone": "Timezone",
   "settings.timezoneHint": "“system” follows this computer. Now using {tz}.",
   "settings.testNotification": "Send a test reminder",
+  "settings.sound": "Play a sound",
+  "settings.soundHint": "Reminders play your system's notification sound. Your system's Do Not Disturb or Focus settings can still mute it.",
   "settings.testSent": "Sent. If nothing appeared, check this computer's notification settings.",
   "settings.calendar": "Calendar",
   "settings.feed": "Calendar feed",

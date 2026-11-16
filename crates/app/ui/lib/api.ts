@@ -59,6 +59,7 @@ export interface RoutineBlock { id: number; weekday: number; start: string; end:
 export interface Settings {
   timezone: string; day_rollover: string; quiet_start: string; quiet_end: string;
   reminder_offsets: string[]; feed_port: number; language: "en" | "ja"; quick_add_shortcut: string;
+  reminder_sound: boolean;
 }
 export interface SettingsInfo {
   settings: Settings; effective_timezone: string; db_path: string; log_path: string;

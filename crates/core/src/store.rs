@@ -163,6 +163,17 @@ impl Store {
         &self.conn
     }
 
+    /// Start a write transaction with `BEGIN IMMEDIATE`. A deferred
+    /// transaction that reads first and writes later cannot wait for the lock:
+    /// if another connection wrote in between, SQLite returns "database is
+    /// locked" at once, ignoring the busy timeout. Taking the write lock up
+    /// front makes concurrent writers queue behind `busy_timeout` instead.
+    fn write_tx(&mut self) -> Result<rusqlite::Transaction<'_>> {
+        Ok(self
+            .conn
+            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?)
+    }
+
     pub fn data_version(&self) -> Result<i64> {
         crate::db::data_version(&self.conn)
     }
@@ -195,7 +206,7 @@ impl Store {
             serde_json::Value::Object(m) => m,
             _ => unreachable!(),
         };
-        let tx = self.conn.transaction()?;
+        let tx = self.write_tx()?;
         for (k, v) in map {
             tx.execute(
                 "INSERT INTO settings(key, value) VALUES (?1, ?2)
@@ -305,7 +316,7 @@ impl Store {
             }),
             _ => None,
         };
-        let tx = self.conn.transaction()?;
+        let tx = self.write_tx()?;
         let mut id = new_id();
         for _ in 0..50 {
             let exists: bool = tx.query_row(
@@ -400,7 +411,7 @@ impl Store {
         let minutes = patch.estimated_minutes.map(check_minutes).transpose()?;
         let clock = self.clock()?;
 
-        let tx = self.conn.transaction()?;
+        let tx = self.write_tx()?;
         if let Some(t) = title {
             tx.execute("UPDATE items SET title = ?2 WHERE id = ?1", params![id, t])?;
         }
@@ -740,7 +751,7 @@ impl Store {
         for b in blocks {
             b.validate()?;
         }
-        let tx = self.conn.transaction()?;
+        let tx = self.write_tx()?;
         tx.execute("DELETE FROM routine_blocks", [])?;
         for b in blocks {
             let (s, e) = b.times()?;
@@ -792,7 +803,7 @@ impl Store {
         entries: &[(String, String)],
         now: DateTime<Utc>,
     ) -> Result<usize> {
-        let tx = self.conn.transaction()?;
+        let tx = self.write_tx()?;
         let mut n = 0;
         for (item, key) in entries {
             n += tx.execute(
@@ -829,7 +840,7 @@ impl Store {
             return Err(invalid("This file is not a Paperweight export."));
         }
         data.settings.validate()?;
-        let tx = self.conn.transaction()?;
+        let tx = self.write_tx()?;
         for item in &data.items {
             clean_title(&item.title)?;
             tx.execute("DELETE FROM items WHERE id = ?1", [&item.id])?;

@@ -275,6 +275,8 @@ pub struct Settings {
     pub language: String,
     /// Global keyboard shortcut for quick add.
     pub quick_add_shortcut: String,
+    /// Play the system's reminder sound with each notification.
+    pub reminder_sound: bool,
 }
 
 impl Default for Settings {
@@ -288,6 +290,7 @@ impl Default for Settings {
             feed_port: 47800,
             language: "en".into(),
             quick_add_shortcut: "CommandOrControl+Shift+Space".into(),
+            reminder_sound: true,
         }
     }
 }

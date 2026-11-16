@@ -10,7 +10,7 @@ Status key: ✅ verified (seen working) · ⚠️ partly verified · ❌ not ver
 |---|---|---|
 | `cargo build --workspace` | ✅ | 0 warnings, 0 errors |
 | `cargo clippy --workspace --all-targets -- -D warnings` | ✅ | 0 warnings, 0 errors |
-| `cargo test --workspace` | ✅ | 55 tests pass: 28 data model, 1 env override, 8 feed and connect, 17 reminders and planner, 1 MCP stdio integration |
+| `cargo test --workspace` | ✅ | 57 tests pass: 29 data model, 1 concurrency, 1 env override, 8 feed and connect, 17 reminders and planner, 1 MCP stdio integration |
 | `cargo fmt --all --check` | ✅ | clean |
 | `npm run check` (svelte-check, `--fail-on-warnings`) | ✅ | 0 errors, 0 warnings |
 | Cargo.lock committed | ✅ | in git (along with both `package-lock.json` files) |
@@ -38,10 +38,12 @@ Status key: ✅ verified (seen working) · ⚠️ partly verified · ❌ not ver
 | Watch the GUI update live | ✅ | Items added by the Inspector and by `paperweight-mcp` appeared in Today without a restart (see gate 4) |
 | A reminder fires for an item due in a few minutes | ✅ | Due 23:38; the scheduler delivered "Due now — today 23:38" at 23:38:00.9 and dunst displayed it (`screenshots/notification-due-now.png`) |
 | Notification Done / Snooze / click | ✅ (Linux) | Pressed through dunst's action menu. **Done** marked the item done and closed the notification. **Snooze till tomorrow** set `snoozed_until` to 12:00 the next day and left the deadline unchanged. A **click** opened the item in the app |
+| Reminder sound | ⚠️ | On Linux, the `Notify` call carried `sound-name: message-new-instant` (seen with `dbus-monitor`). No audio device here, so nothing was heard. The Windows sound ("Reminder") and macOS sound ("Glass") were checked only by reading the notification libraries' source, not by running on those systems |
+| Parallel writes (assistant sending several tool calls at once) | ✅ | Seen failing in real use on Windows ("database is locked"). Reproduced by `crates/core/tests/concurrency.rs` (8 connections × 15 add/update/log writes), which failed before the fix and passes after; the MCP stdio test now sends 6 tool calls at once |
 | Catch-up digest instead of a flood | ✅ | On launch with 6 pending reminders, one "While you were away: 6 reminders" notification |
 | Tray shows the count and a menu with the next five items, Open, Quick add, Quit | ✅ | Read over D-Bus from the app's StatusNotifierItem: label `1`, menu lists 5 items plus Open Paperweight, Quick add…, Quit Paperweight. Clicking a menu entry opened that item. The badge icon is in `screenshots/tray-icon-badge.png`. **Not** seen in a real desktop panel |
 | Closing the window hides to tray; single instance; global quick-add shortcut | ✅ | Sent `WM_DELETE_WINDOW`: the window hid and the process kept running. `Ctrl+Shift+Space` while hidden opened Quick add; typing "Return library books thursday 18:00" and Enter created it, due Thu 19 Nov 18:00. A second launch exited and re-showed the first instance (1 process) |
-| Starts at login | ⚠️ | On first run the app wrote an XDG autostart entry with `--hidden`. A login was not performed, so starting at login itself was not seen. Note: when run as an **AppImage**, the entry went to the real `~/.config/autostart` despite a scratch `XDG_CONFIG_HOME`. It was removed after the test |
+| Starts at login | ⚠️ | On first run the app wrote an XDG autostart entry with `--hidden`. A login was not performed, so starting at login itself was not seen. Note: the autostart plugin writes to the real `~/.config/autostart` even when `XDG_CONFIG_HOME` points elsewhere (seen with the AppImage and with a debug build). Test runs therefore created real entries; they were removed after each test |
 | Subscribe a calendar app to the feed | ❌ | No calendar application is available in this environment. The served feed was validated with two parsers instead and confirmed to listen on `127.0.0.1:47800` only (`ss -ltnp`) |
 | Connect helper writes Claude Desktop's config | ✅ (sandboxed) | Clicked **Add to Claude Desktop** in the GUI against a scratch `claude_desktop_config.json` that already had a `filesystem` server. It made a backup, added `paperweight`, and kept `filesystem` and `globalShortcut` and their order (`screenshots/*-9-connect-result.png`) |
 | Claude Desktop actually using the server or the `.mcpb` | ❌ | Claude Desktop is not available on Linux, and none was installed here |
@@ -60,6 +62,8 @@ Status key: ✅ verified (seen working) · ⚠️ partly verified · ❌ not ver
 
 ## Bugs found and fixed while using it
 
+- Parallel tool calls failed with "database is locked". Write transactions now start with `BEGIN IMMEDIATE`.
+- Reminders were silent on Windows. They now play the system reminder sound, with a setting to turn it off.
 - Settings failed to load ("The object can not be cloned"): `structuredClone` can't copy a Svelte 5 state proxy. Fixed with `$state.snapshot`.
 - Completed items were labelled "overdue (…)". Labels now only say overdue for open items.
 - The reminder at the exact deadline said "Overdue — was due …". It now says "Due now — …".

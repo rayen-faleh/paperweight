@@ -459,6 +459,37 @@ async fn every_tool_over_real_stdio() {
     };
     assert!(ptext.contains("get_brief") && ptext.contains("plan_week"));
 
+    // Parallel tool calls (assistants often send several at once) must all
+    // succeed, not fail with "database is locked".
+    let (r1, r2, r3, r4, r5, r6) = tokio::join!(
+        h.call(
+            "add_item",
+            json!({"title": "Parallel 1", "due": "tomorrow 11:00", "requirements": ["a"]})
+        ),
+        h.call(
+            "add_item",
+            json!({"title": "Parallel 2", "due": "tomorrow 12:15", "steps": [{"title": "s"}]})
+        ),
+        h.call(
+            "add_item",
+            json!({"title": "Parallel 3", "due": "in 2 days"})
+        ),
+        h.call(
+            "update_item",
+            json!({"id": id, "add_requirements": ["extra req"]})
+        ),
+        h.call(
+            "add_item",
+            json!({"title": "Parallel 4", "due": "in 3 days"})
+        ),
+        h.call("snooze_item", json!({"id": id, "until": "tomorrow 09:00"})),
+    );
+    for r in [r1, r2, r3, r4, r5, r6] {
+        assert_ne!(r.is_error, Some(true), "parallel call failed: {}", text(&r));
+    }
+    let par = h.ok("list_items", json!({"query": "Parallel"})).await;
+    assert_eq!(par["count"], 4);
+
     // The server is still alive after every error above.
     h.ok("get_brief", Value::Null).await;
 

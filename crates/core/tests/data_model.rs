@@ -761,3 +761,18 @@ fn finished_items_are_not_labelled_overdue() {
     assert_eq!(v.due_label, "today 13:00");
     assert!(!v.overdue);
 }
+
+#[test]
+fn reminder_sound_defaults_on_even_for_older_settings() {
+    assert!(Settings::default().reminder_sound);
+    let (_d, mut s) = store();
+    // A database saved before the setting existed has no row for it.
+    s.conn()
+        .execute("DELETE FROM settings WHERE key = 'reminder_sound'", [])
+        .unwrap();
+    assert!(s.settings().unwrap().reminder_sound);
+    let mut off = s.settings().unwrap();
+    off.reminder_sound = false;
+    s.save_settings(&off).unwrap();
+    assert!(!s.settings().unwrap().reminder_sound);
+}

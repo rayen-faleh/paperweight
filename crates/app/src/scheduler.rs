@@ -70,7 +70,7 @@ fn tick(app: &AppHandle, now: DateTime<Utc>, first: bool) -> Result<(), String> 
         catch_up,
     });
     if let Some(d) = &out.delivery {
-        deliver(app, d);
+        deliver(app, d, settings.reminder_sound);
     }
     if !out.mark_sent.is_empty() {
         store
@@ -101,7 +101,27 @@ fn next_notification_id() -> i32 {
     (Utc::now().timestamp_millis() % i32::MAX as i64) as i32
 }
 
-pub fn deliver(app: &AppHandle, d: &Delivery) {
+/// The system sound reminders play. Without one, Windows toasts are silent
+/// (the toast library writes `<audio silent="true"/>`) and macOS plays nothing.
+pub fn reminder_sound_name() -> &'static str {
+    #[cfg(windows)]
+    {
+        // ms-winsoundevent:Notification.Reminder
+        "Reminder"
+    }
+    #[cfg(target_os = "macos")]
+    {
+        // /System/Library/Sounds/Glass.aiff
+        "Glass"
+    }
+    #[cfg(not(any(windows, target_os = "macos")))]
+    {
+        // freedesktop sound theme name, sent as the `sound-name` hint
+        "message-new-instant"
+    }
+}
+
+pub fn deliver(app: &AppHandle, d: &Delivery, sound: bool) {
     let id = next_notification_id();
     let state = app.state::<AppState>();
     let mut builder = app
@@ -110,6 +130,9 @@ pub fn deliver(app: &AppHandle, d: &Delivery) {
         .id(id)
         .title(&d.title)
         .body(&d.body);
+    if sound {
+        builder = builder.sound(reminder_sound_name());
+    }
     if let Some(item) = &d.item_id {
         state.notified.lock().unwrap().insert(id, item.clone());
         builder = builder.extra("item_id", item.clone());
@@ -121,7 +144,7 @@ pub fn deliver(app: &AppHandle, d: &Delivery) {
     }
     match builder.show() {
         Ok(()) => {
-            tracing::info!(kind = ?d.kind, title = %d.title, body = %d.body, "reminder delivered")
+            tracing::info!(kind = ?d.kind, title = %d.title, body = %d.body, sound = sound.then(reminder_sound_name), "reminder delivered")
         }
         Err(e) => tracing::warn!("could not show notification: {e}"),
     }

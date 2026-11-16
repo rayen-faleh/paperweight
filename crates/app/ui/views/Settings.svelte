@@ -104,6 +104,10 @@
         <input class="fit" bind:value={s.timezone} />
       </div>
       <div class="row">
+        <label class="lab" for="sound">{t("settings.sound")}<p class="muted small">{t("settings.soundHint")}</p></label>
+        <input id="sound" class="check" type="checkbox" bind:checked={s.reminder_sound} />
+      </div>
+      <div class="row">
         <div></div>
         <button onclick={() => run(api.testNotification, () => toast(t("settings.testSent")))}>{t("settings.testNotification")}</button>
       </div>

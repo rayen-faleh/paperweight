@@ -3,7 +3,7 @@
 Paperweight is an open-source, local-first deadline tracker for paperwork, assignments and life admin. You add things by telling your AI assistant in one sentence ("here's the form from city hall, track it"), and Paperweight reminds you, so you never have to remember to open it.
 
 - **One sentence to add.** Your assistant talks to Paperweight through a local MCP server. It can add an item with its checklist of what's needed and its steps in one call, then confirm it back to you.
-- **Reminders come to you.** A small tray app sends reminders, a week before, two days before, on the day and daily while overdue. It holds them during quiet hours and sends one summary instead of a flood.
+- **Reminders come to you.** A small tray app sends reminders, with your system's notification sound, a week before, two days before, on the day and daily while overdue. It holds them during quiet hours and sends one summary instead of a flood.
 - **Your day, not the clock's.** The day ends at 02:00 by default, so something due at 01:00 Wednesday is "Tuesday night".
 - **Everything stays on your computer.** No accounts, no cloud, no telemetry. The only network traffic is on `127.0.0.1` (the calendar feed). The app never calls an LLM.
 
@@ -109,7 +109,7 @@ Dates can be ISO 8601 (`2026-11-20`, `2026-11-20T17:00`, with or without an offs
 - **Item detail**: edit everything, tick the checklist and steps, snooze, complete, delete.
 - **Routine**: your weekly blocks; the ones marked "for tasks" feed `plan_week`.
 - **Archive**: restore deleted items for 30 days.
-- **Settings**: quiet hours, reminder offsets, day rollover, timezone, calendar feed and port, `.ics` export, language, start at login, quick-add shortcut, JSON export and import, and Connect your AI assistant.
+- **Settings**: quiet hours, reminder offsets, reminder sound on or off, day rollover, timezone, calendar feed and port, `.ics` export, language, start at login, quick-add shortcut, JSON export and import, and Connect your AI assistant.
 
 ### Calendar feed
 
