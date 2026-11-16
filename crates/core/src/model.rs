@@ -277,6 +277,9 @@ pub struct Settings {
     pub quick_add_shortcut: String,
     /// Play the system's reminder sound with each notification.
     pub reminder_sound: bool,
+    /// Check GitHub for a new release once a day. Off by default: without it
+    /// Paperweight only goes online when you press "Check for updates".
+    pub auto_update_check: bool,
 }
 
 impl Default for Settings {
@@ -291,6 +294,7 @@ impl Default for Settings {
             language: "en".into(),
             quick_add_shortcut: "CommandOrControl+Shift+Space".into(),
             reminder_sound: true,
+            auto_update_check: false,
         }
     }
 }

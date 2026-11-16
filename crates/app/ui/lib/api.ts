@@ -60,6 +60,7 @@ export interface Settings {
   timezone: string; day_rollover: string; quiet_start: string; quiet_end: string;
   reminder_offsets: string[]; feed_port: number; language: "en" | "ja"; quick_add_shortcut: string;
   reminder_sound: boolean;
+  auto_update_check: boolean;
 }
 export interface SettingsInfo {
   settings: Settings; effective_timezone: string; db_path: string; log_path: string;
@@ -80,6 +81,8 @@ export interface Changes {
   add_step?: string; set_step?: [number, boolean]; rename_step?: [number, string]; remove_step?: number;
   add_requirement?: string; set_requirement?: [number, boolean]; remove_requirement?: number;
 }
+
+export interface UpdateInfo { current: string; available: string | null; notes: string | null; date: string | null }
 
 export const api = {
   brief: () => invoke<Brief>("brief"),
@@ -107,6 +110,9 @@ export const api = {
   connectInfo: () => invoke<ConnectInfo>("connect_info"),
   connectClaudeDesktop: () => invoke<ConnectOutcome>("connect_claude_desktop"),
   testNotification: () => invoke<void>("test_notification"),
+  appVersion: () => invoke<string>("app_version"),
+  checkUpdates: () => invoke<UpdateInfo>("check_updates"),
+  installUpdate: () => invoke<void>("install_update"),
 };
 
 /** "17:00" from an ISO string with offset, without letting the browser's timezone interfere. */

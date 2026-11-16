@@ -7,6 +7,7 @@ mod badge;
 mod commands;
 mod scheduler;
 mod tray;
+mod updates;
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -107,6 +108,12 @@ pub fn show_main(app: &AppHandle) {
 pub fn open_item(app: &AppHandle, id: &str) {
     show_main(app);
     let _ = app.emit("open-item", id.to_string());
+}
+
+/// Bring the window up on a given view (e.g. "settings").
+pub fn open_view(app: &AppHandle, view: &str) {
+    show_main(app);
+    let _ = app.emit("navigate", view.to_string());
 }
 
 pub fn open_quick_add(app: &AppHandle) {
@@ -249,6 +256,8 @@ fn main() {
                 .build(),
         )
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(updates::Pending::default())
         .manage(AppState {
             db_path: db_path.clone(),
             feed: Mutex::new(None),
@@ -281,6 +290,9 @@ fn main() {
             commands::connect_info,
             commands::connect_claude_desktop,
             commands::test_notification,
+            commands::app_version,
+            commands::check_updates,
+            commands::install_update,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
@@ -312,6 +324,7 @@ fn main() {
 
             spawn_watcher(handle.clone(), db_path.clone());
             scheduler::spawn(handle.clone());
+            updates::spawn_daily(handle.clone());
 
             if !start_hidden {
                 show_main(&handle);

@@ -437,3 +437,18 @@ pub fn test_notification(app: AppHandle, state: State<AppState>) -> Res<()> {
     );
     Ok(())
 }
+
+#[tauri::command]
+pub fn app_version(app: AppHandle) -> String {
+    app.package_info().version.to_string()
+}
+
+#[tauri::command]
+pub async fn check_updates(app: AppHandle) -> Res<crate::updates::UpdateInfo> {
+    crate::updates::check(&app).await
+}
+
+#[tauri::command]
+pub async fn install_update(app: AppHandle) -> Res<()> {
+    crate::updates::install(app).await
+}

@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "paperweight",
   "display_name": "Paperweight",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local-first deadline tracker for paperwork, assignments and life admin. Add things in one sentence; Paperweight reminds you.",
   "long_description": "Paperweight keeps track of deadlines for paperwork, assignments, payments, appointments and plans with friends, entirely on your computer. Tell Claude about a form or a bill and it is tracked, with its checklist of what's needed and the steps to get it done. The Paperweight desktop app (installed separately) sends the reminders, so you never have to remember to open anything.\n\nNo accounts, no cloud, no network traffic: the server reads and writes a local SQLite database shared with the desktop app.",
   "author": { "name": "Paperweight contributors" },

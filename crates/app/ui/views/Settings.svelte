@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { api, errorText, type ConnectInfo, type ConnectOutcome, type SettingsInfo, type Settings } from "../lib/api";
+  import { onMount } from "svelte";
+  import { listen } from "@tauri-apps/api/event";
+  import { api, errorText, type ConnectInfo, type ConnectOutcome, type SettingsInfo, type Settings, type UpdateInfo } from "../lib/api";
   import { i18n, t } from "../lib/i18n.svelte";
   import { ui, toast, prettyShortcut } from "../lib/state.svelte";
 
@@ -24,6 +26,45 @@
     }
   }
   load();
+
+  // ---- updates ----
+  let version = $state("");
+  let update = $state<UpdateInfo | null>(null);
+  let updateState = $state<"idle" | "checking" | "downloading" | "installing">("idle");
+  let progress = $state<{ downloaded: number; total: number | null } | null>(null);
+
+  onMount(() => {
+    api.appVersion().then((v) => (version = v));
+    const off = listen<{ downloaded: number; total: number | null }>("update-progress", (e) => (progress = e.payload));
+    return () => {
+      off.then((f) => f());
+    };
+  });
+
+  async function checkUpdates() {
+    updateState = "checking";
+    try {
+      update = await api.checkUpdates();
+    } catch (e) {
+      toast(errorText(e));
+    } finally {
+      updateState = "idle";
+    }
+  }
+
+  async function installUpdate() {
+    updateState = "downloading";
+    progress = null;
+    try {
+      await api.installUpdate();
+      updateState = "installing";
+    } catch (e) {
+      updateState = "idle";
+      toast(errorText(e));
+    }
+  }
+
+  const percent = $derived(progress?.total ? `${Math.round((progress.downloaded / progress.total) * 100)}%` : "");
 
   async function save() {
     if (!s) return;
@@ -110,6 +151,38 @@
       <div class="row">
         <div></div>
         <button onclick={() => run(api.testNotification, () => toast(t("settings.testSent")))}>{t("settings.testNotification")}</button>
+      </div>
+    </div>
+
+    <div class="card" id="updates">
+      <h2>{t("updates.title")}</h2>
+      <div class="row">
+        <div class="lab">
+          {t("updates.version", { version: version || "…" })}
+          {#if update && !update.available}<p class="muted small">{t("updates.upToDate")}</p>{/if}
+        </div>
+        <button onclick={checkUpdates} disabled={updateState !== "idle"}>
+          {updateState === "checking" ? t("updates.checking") : t("updates.check")}
+        </button>
+      </div>
+      {#if update?.available}
+        <div class="update">
+          <p><b>{t("updates.available", { version: update.available })}</b></p>
+          {#if update.notes}<pre class="notes">{update.notes}</pre>{/if}
+          <p class="muted small">{t("updates.mcpNote")}</p>
+          {#if updateState === "downloading" || updateState === "installing"}
+            <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress?.total ? Math.round((progress.downloaded / progress.total) * 100) : undefined}>
+              <i style:width={progress?.total ? `${(progress.downloaded / progress.total) * 100}%` : "30%"} class:indeterminate={!progress?.total}></i>
+            </div>
+            <p class="small">{updateState === "installing" ? t("updates.installing") : t("updates.downloading", { percent })}</p>
+          {:else}
+            <button class="primary" onclick={installUpdate}>{t("updates.install")}</button>
+          {/if}
+        </div>
+      {/if}
+      <div class="row">
+        <label class="lab" for="autoupdate">{t("updates.auto")}<p class="muted small">{t("updates.autoHint")}</p></label>
+        <input id="autoupdate" class="check" type="checkbox" bind:checked={s.auto_update_check} />
       </div>
     </div>
 
@@ -352,6 +425,52 @@
   }
   .ok {
     color: var(--ink-2);
+  }
+  .update {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--sunken);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .update p {
+    margin: 0;
+  }
+  .notes {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--ink-2);
+    max-height: 160px;
+    overflow: auto;
+  }
+  .progress {
+    width: 100%;
+    height: 6px;
+    border-radius: 4px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .progress i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.25s;
+  }
+  .progress i.indeterminate {
+    animation: slide 1.2s ease-in-out infinite;
+  }
+  @keyframes slide {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(340%);
+    }
   }
   .warn {
     color: var(--accent);

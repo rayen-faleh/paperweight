@@ -47,6 +47,11 @@
         ui.quickAdd = false;
         ui.selected = e.payload;
       }),
+      listen<string>("navigate", (e) => {
+        ui.quickAdd = false;
+        ui.selected = null;
+        ui.view = e.payload as View;
+      }),
       listen("quick-add", () => {
         ui.selected = null;
         ui.quickAdd = true;

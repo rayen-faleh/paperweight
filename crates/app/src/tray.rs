@@ -63,6 +63,11 @@ fn menu(app: &AppHandle, snap: Option<&Snapshot>) -> tauri::Result<Menu<Wry>> {
             );
         }
     }
+    if let Some(v) = crate::updates::pending_version(app) {
+        m = m
+            .separator()
+            .item(&MenuItemBuilder::with_id("update", format!("Update to {v}…")).build(app)?);
+    }
     m.separator()
         .item(&MenuItemBuilder::with_id("open", "Open Paperweight").build(app)?)
         .item(&MenuItemBuilder::with_id("quick", "Quick add…").build(app)?)
@@ -88,6 +93,7 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
             match id {
                 "open" => crate::show_main(app),
                 "quick" => crate::open_quick_add(app),
+                "update" => crate::open_view(app, "settings"),
                 "quit" => app.exit(0),
                 other => {
                     if let Some(item) = other.strip_prefix("item:") {
