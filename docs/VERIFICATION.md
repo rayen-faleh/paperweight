@@ -56,8 +56,8 @@ Status key: ✅ verified (seen working) · ⚠️ partly verified · ❌ not ver
 | Check | Status | Notes |
 |---|---|---|
 | Tauri bundles with `paperweight-mcp` as a sidecar | ✅ (Linux) | Built `.deb`, `.rpm` and `.AppImage`. The `.deb` installs `/usr/bin/paperweight` and `/usr/bin/paperweight-mcp`. Not installed with `dpkg` |
-| macOS and Windows builds, bundles and runtime | ❌ | Only Linux was available here. Nothing was compiled or run on macOS or Windows, including notification actions, the tray badge and Claude Desktop paths there |
-| GitHub Actions workflow | ❌ | `.github/workflows/ci.yml` is written and parses as YAML, but there was no GitHub runner to execute it. It has not run yet |
+| macOS and Windows builds, bundles and runtime | ⚠️ | Built, tested and packaged by CI on both. Runtime: the Windows installer was installed and run by the user, and its MCP server answered from WSL (`get_brief`, `add_item`). The Windows tray, notifications, sound and start at login were not observed by me. macOS runtime is untested |
+| GitHub Actions workflow | ✅ | Run [43890776114](https://github.com/rayen-faleh/paperweight/actions/runs/43890776114) on `ccd78cd` succeeded on `ubuntu-24.04`, `macos-latest` and `windows-latest`: fmt, build, clippy, tests, svelte-check, Tauri bundles and the `.mcpb`. Each job uploaded its installers as an artifact |
 | Japanese UI | ⚠️ | All keys exist in the `ja` table with empty values and fall back to English, as requested. No translation was done or checked |
 
 ## Bugs found and fixed while using it
