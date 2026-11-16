@@ -1,0 +1,10 @@
+/target
+node_modules/
+/crates/app/dist/
+/crates/app/src-tauri/gen/
+*.db
+*.db-wal
+*.db-shm
+/dist-mcpb/
+*.mcpb
+/crates/app/binaries/

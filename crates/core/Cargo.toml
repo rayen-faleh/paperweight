@@ -1,0 +1,22 @@
+[package]
+name = "paperweight-core"
+description = "Domain model, storage, date parsing, reminders, planner and iCalendar feed for Paperweight."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+rusqlite.workspace = true
+chrono.workspace = true
+chrono-tz.workspace = true
+iana-time-zone.workspace = true
+directories.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+schemars.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+icalendar = { version = "0.17.17", default-features = false, features = ["parser"] }
