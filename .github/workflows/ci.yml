@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-test:
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Linux system libraries for Tauri
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libdbus-1-dev libssl-dev build-essential file
+
+      # The toolchain (1.94.0 with clippy and rustfmt) comes from rust-toolchain.toml.
+      - name: Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            crates/app/package-lock.json
+            packaging/mcpb/package-lock.json
+
+      - name: Frontend install, type-check and build
+        working-directory: crates/app
+        run: |
+          npm ci
+          npm run check
+          npm run build
+
+      - name: rustfmt
+        run: cargo fmt --all --check
+
+      - name: Build
+        run: cargo build --workspace --locked
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Test
+        run: cargo test --workspace --locked
+
+      - name: Sidecar for the bundle
+        run: ./scripts/prepare-sidecar.sh
+
+      - name: Tauri bundle
+        working-directory: crates/app
+        run: npx tauri build --config tauri.bundle.conf.json
+
+      - name: MCP Bundle (.mcpb), validated with the mcpb CLI
+        working-directory: packaging/mcpb
+        run: |
+          npm ci
+          npm run build
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: paperweight-${{ matrix.os }}
+          path: |
+            target/release/bundle/**/*.deb
+            target/release/bundle/**/*.rpm
+            target/release/bundle/**/*.AppImage
+            target/release/bundle/**/*.dmg
+            target/release/bundle/**/*.msi
+            target/release/bundle/**/*-setup.exe
+            dist-mcpb/*.mcpb
+          if-no-files-found: error
