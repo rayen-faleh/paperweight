@@ -5,16 +5,16 @@
   import { i18n, t } from "./lib/i18n.svelte";
   import { ui, changed, prettyShortcut, type View } from "./lib/state.svelte";
   import Today from "./views/Today.svelte";
-  import AllItems from "./views/AllItems.svelte";
+  import Overview from "./views/Overview.svelte";
   import Routine from "./views/Routine.svelte";
   import Archive from "./views/Archive.svelte";
   import SettingsView from "./views/Settings.svelte";
   import ItemDetail from "./views/ItemDetail.svelte";
   import QuickAdd from "./views/QuickAdd.svelte";
 
-  const nav: { view: View; key: "nav.today" | "nav.all" | "nav.routine" | "nav.archive" | "nav.settings" }[] = [
+  const nav: { view: View; key: "nav.today" | "nav.overview" | "nav.routine" | "nav.archive" | "nav.settings" }[] = [
     { view: "today", key: "nav.today" },
-    { view: "all", key: "nav.all" },
+    { view: "overview", key: "nav.overview" },
     { view: "routine", key: "nav.routine" },
     { view: "archive", key: "nav.archive" },
     { view: "settings", key: "nav.settings" },
@@ -35,7 +35,7 @@
     // Allow a view to be chosen by URL hash (used for screenshots): #today, #settings, #item=pw-xxxx.
     const hash = location.hash.slice(1);
     if (hash.startsWith("item=")) ui.selected = hash.slice(5);
-    else if (["today", "all", "routine", "archive", "settings"].includes(hash)) ui.view = hash as View;
+    else if (["today", "overview", "routine", "archive", "settings"].includes(hash)) ui.view = hash as View;
     else if (hash === "quick") ui.quickAdd = true;
 
     const unlisten = [
@@ -103,7 +103,7 @@
   <main>
     {#key ui.view}
       {#if ui.view === "today"}<Today />
-      {:else if ui.view === "all"}<AllItems />
+      {:else if ui.view === "overview"}<Overview />
       {:else if ui.view === "routine"}<Routine />
       {:else if ui.view === "archive"}<Archive />
       {:else}<SettingsView />

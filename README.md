@@ -105,7 +105,7 @@ Dates can be ISO 8601 (`2026-11-20`, `2026-11-20T17:00`, with or without an offs
 
 - **Today** (default): overdue, today (with the 02:00 rollover), and the next seven days, plus suggested work sessions from your routine.
 - **Quick add**: press `Ctrl+Shift+Space` (`⌘⇧Space` on macOS) from anywhere, or `n` / `Ctrl+K` in the window. Type `City hall form friday 17:00` and press Enter. It uses the same date parser as the MCP server.
-- **All items**: search and filter by status and kind.
+- **Overview**: a period you choose with a slider, from one week to one year, shown two ways. **Stacks** groups deadlines into piles by day, week or month, with each pile's work against your free task time. **Near and far** runs time down the page, giving the next few days the most room. Search and the kind filters fade out everything that doesn't match.
 - **Item detail**: edit everything, tick the checklist and steps, snooze, complete, delete.
 - **Routine**: your weekly blocks; the ones marked "for tasks" feed `plan_week`.
 - **Archive**: restore deleted items for 30 days.

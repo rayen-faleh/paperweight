@@ -1,4 +1,4 @@
-export type View = "today" | "all" | "routine" | "archive" | "settings";
+export type View = "today" | "overview" | "routine" | "archive" | "settings";
 
 export const ui = $state({
   view: "today" as View,

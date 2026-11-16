@@ -113,3 +113,19 @@ textarea { resize: vertical; min-height: 90px; line-height: 1.45; }
 .check:focus-visible { box-shadow: 0 0 0 3px var(--focus); }
 
 ::selection { background: var(--accent-soft); }
+
+/* Kind shapes: one mark per kind, used by the Overview and its filters.
+   Shape carries the kind; colour stays ink (accent only for overdue). */
+.shape { display: inline-block; width: 10px; height: 10px; flex: none; position: relative; color: var(--ink); }
+.shape::before { content: ""; position: absolute; inset: 0; background: currentColor; }
+.shape.k-paperwork::before { border-radius: 1.5px; }
+.shape.k-assignment::before { border-radius: 50%; }
+.shape.k-payment::before { transform: rotate(45deg) scale(.8); border-radius: 1px; }
+.shape.k-appointment::before { background: transparent; border: 2.2px solid currentColor; border-radius: 50%; }
+.shape.k-social::before { background: transparent; border: 2.2px dotted currentColor; border-radius: 50%; }
+.shape.k-other::before { inset: 2.5px; border-radius: 50%; }
+.shape.late { color: var(--accent); }
+
+/* Elements the Overview morphs get their own layer up front, so the first
+   frame of a move is painted instead of blank while the layer is created. */
+[data-flip] { will-change: transform; backface-visibility: hidden; }
