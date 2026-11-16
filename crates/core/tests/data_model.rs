@@ -709,3 +709,36 @@ fn demo_seed_has_the_promised_week() {
         "one overdue"
     );
 }
+
+#[test]
+fn quick_add_splits_title_and_date_with_the_same_parser() {
+    use paperweight_core::dates::parse_quick_add;
+    let c = clock();
+    let now = tue_afternoon();
+    let (t, d) = parse_quick_add("City hall form by friday 17:00", now, &c).unwrap();
+    assert_eq!(
+        (t.as_str(), d.at, d.all_day),
+        ("City hall form", jst(2026, 11, 20, 17, 0), false)
+    );
+    let (t, d) = parse_quick_add("Rent 2026-11-30", now, &c).unwrap();
+    assert_eq!(t, "Rent");
+    assert!(d.all_day);
+    let (t, d) =
+        parse_quick_add("Email the professor about next week, tonight 1am", now, &c).unwrap();
+    assert_eq!(t, "Email the professor about next week");
+    assert_eq!(d.at, jst(2026, 11, 18, 1, 0));
+    let (t, _) = parse_quick_add("Read chapter 4 in 3 days", now, &c).unwrap();
+    assert_eq!(t, "Read chapter 4");
+    let (t, d) = parse_quick_add("Dinner next friday at 7:30pm", now, &c).unwrap();
+    assert_eq!((t.as_str(), d.at), ("Dinner", jst(2026, 11, 20, 19, 30)));
+    assert!(
+        parse_quick_add("Something sometime", now, &c)
+            .unwrap_err()
+            .to_string()
+            .contains("Add a date")
+    );
+    assert!(
+        parse_quick_add("tomorrow", now, &c).is_err(),
+        "needs a title"
+    );
+}

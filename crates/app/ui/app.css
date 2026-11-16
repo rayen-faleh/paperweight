@@ -1,0 +1,115 @@
+/* Paperweight: calm, quiet, fast. Warm paper, ink, and one accent — the red
+   of a hanko stamp, because this app is about paperwork getting done. */
+
+:root {
+  --bg: #f5f2ec;
+  --surface: #fffdf9;
+  --sunken: #ede9e1;
+  --ink: #1f1d1a;
+  --ink-2: #4a463f;
+  --muted: #7a746a;
+  --line: #e2ddd2;
+  --accent: #b9452e;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(185, 69, 46, 0.09);
+  --focus: rgba(185, 69, 46, 0.35);
+  --shadow: 0 1px 2px rgba(31, 29, 26, 0.04), 0 8px 28px rgba(31, 29, 26, 0.08);
+  --radius: 10px;
+  --font: system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161513;
+    --surface: #1e1d1a;
+    --sunken: #252320;
+    --ink: #ece7de;
+    --ink-2: #c9c3b8;
+    --muted: #958f84;
+    --line: #2f2d29;
+    --accent: #e0745a;
+    --accent-ink: #1a1310;
+    --accent-soft: rgba(224, 116, 90, 0.12);
+    --focus: rgba(224, 116, 90, 0.4);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app { height: 100%; }
+
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+button {
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 7px 14px;
+  transition: background 120ms, border-color 120ms;
+}
+button:hover { border-color: var(--muted); }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.primary:hover { filter: brightness(1.05); }
+button.ghost { border-color: transparent; background: transparent; color: var(--ink-2); }
+button.ghost:hover { background: var(--sunken); }
+button.danger { color: var(--accent); }
+button:disabled { opacity: 0.5; cursor: default; }
+
+input[type="text"], input[type="number"], input[type="time"], input:not([type]), select, textarea {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  outline: none;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus, button:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus);
+}
+textarea { resize: vertical; min-height: 90px; line-height: 1.45; }
+
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.tnum { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--mono); font-size: 13px; }
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.check {
+  appearance: none;
+  width: 18px; height: 18px; flex: none;
+  border: 1.5px solid var(--muted);
+  border-radius: 5px;
+  display: inline-grid; place-content: center;
+  cursor: pointer; margin: 0;
+  background: transparent;
+}
+.check:checked { background: var(--accent); border-color: var(--accent); }
+.check:checked::after { content: ""; width: 9px; height: 5px; border: 2px solid var(--accent-ink); border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); }
+.check:focus-visible { box-shadow: 0 0 0 3px var(--focus); }
+
+::selection { background: var(--accent-soft); }

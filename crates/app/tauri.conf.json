@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Paperweight",
+  "mainBinaryName": "paperweight",
+  "version": "0.1.0",
+  "identifier": "app.paperweight.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Paperweight",
+        "width": 1040,
+        "height": 720,
+        "minWidth": 420,
+        "minHeight": 480,
+        "visible": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Productivity",
+    "shortDescription": "Local-first deadline tracker for paperwork and life admin",
+    "longDescription": "Paperweight keeps track of paperwork, assignments and life admin deadlines on your own computer and reminds you, so you never have to remember to open it. Your AI assistant manages it through a local MCP server.",
+    "copyright": "MIT License",
+    "license": "MIT",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "linux": {
+      "deb": { "depends": ["libayatana-appindicator3-1"] }
+    }
+  }
+}

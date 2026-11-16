@@ -240,3 +240,38 @@ fn parse_phrase(text: &str, now: DateTime<Utc>, clock: &Clock) -> Option<Due> {
         }
     }
 }
+
+/// Quick add: "Scholarship form friday 17:00" → ("Scholarship form", Friday
+/// 17:00). The date is the longest run of trailing words that [`parse_due`]
+/// accepts; an optional "by", "due", "on" or "," before it is dropped. Uses
+/// the same parser as the MCP server, so the same phrases work in both.
+pub fn parse_quick_add(text: &str, now: DateTime<Utc>, clock: &Clock) -> Result<(String, Due)> {
+    let words: Vec<&str> = text.split_whitespace().collect();
+    // At most 4 trailing words form a date phrase ("next friday at 5pm").
+    for start in (1..words.len()).filter(|s| words.len() - s <= 4) {
+        let phrase = words[start..].join(" ");
+        if let Ok(due) = parse_due(&phrase, now, clock) {
+            let mut title_words = &words[..start];
+            if let Some(last) = title_words.last()
+                && matches!(
+                    last.to_lowercase().as_str(),
+                    "by" | "due" | "on" | "-" | "—" | "until"
+                )
+            {
+                title_words = &title_words[..title_words.len() - 1];
+            }
+            let title = title_words
+                .join(" ")
+                .trim_end_matches([',', ':', ' '])
+                .to_string();
+            if title.is_empty() {
+                break;
+            }
+            return Ok((title, due));
+        }
+    }
+    let base = date_error(text, now, clock).to_string();
+    Err(Error::Date(format!(
+        "Add a date at the end, for example \"Scholarship form friday 17:00\" or \"Rent 2026-11-30\". {base}"
+    )))
+}

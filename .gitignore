@@ -1,7 +1,7 @@
 /target
 node_modules/
 /crates/app/dist/
-/crates/app/src-tauri/gen/
+/crates/app/gen/
 *.db
 *.db-wal
 *.db-shm
