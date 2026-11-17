@@ -71,3 +71,4 @@ Status key: ✅ verified (seen working) · ⚠️ partly verified · ❌ not ver
 - After Done or Snooze, the notification stayed on screen. It is now removed.
 - Snooze confirmations showed UTC timestamps. They now use local phrases ("tomorrow 12:00").
 - The detail header repeated the date; US-style dates appeared in the archive. Both fixed.
+- 0.2.0 left completed items with no view: replacing All items with the Overview removed the only status filter, so a ticked item vanished and could not be reopened. Fixed in 0.2.1 with a Done tab in the Archive. Checked in the app against a copy of the demo data: three done items listed newest first, clicking one opened its detail page, Reopen set it back to open in the database, and the Deleted tab still lists deleted items.

@@ -2915,7 +2915,7 @@ dependencies = [
 
 [[package]]
 name = "paperweight-app"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "chrono",
  "paperweight-core",
@@ -2935,7 +2935,7 @@ dependencies = [
 
 [[package]]
 name = "paperweight-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "chrono",
  "chrono-tz",
@@ -2952,7 +2952,7 @@ dependencies = [
 
 [[package]]
 name = "paperweight-mcp"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "anyhow",
  "chrono",

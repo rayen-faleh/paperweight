@@ -108,7 +108,7 @@ Dates can be ISO 8601 (`2026-11-20`, `2026-11-20T17:00`, with or without an offs
 - **Overview**: a period you choose with a slider, from one week to one year, shown two ways. **Stacks** groups deadlines into piles by day, week or month, with each pile's work against your free task time. **Near and far** runs time down the page, giving the next few days the most room. Search and the kind filters fade out everything that doesn't match.
 - **Item detail**: edit everything, tick the checklist and steps, snooze, complete, delete.
 - **Routine**: your weekly blocks; the ones marked "for tasks" feed `plan_week`.
-- **Archive**: restore deleted items for 30 days.
+- **Archive**: two tabs. **Done** lists completed items, newest first; open one or reopen it. **Deleted** restores deleted items for 30 days.
 - **Settings**: quiet hours, reminder offsets, reminder sound on or off, day rollover, timezone, calendar feed and port, `.ics` export, language, start at login, quick-add shortcut, JSON export and import, and Connect your AI assistant.
 
 ### Calendar feed
