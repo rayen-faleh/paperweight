@@ -168,10 +168,28 @@ impl Store {
     /// if another connection wrote in between, SQLite returns "database is
     /// locked" at once, ignoring the busy timeout. Taking the write lock up
     /// front makes concurrent writers queue behind `busy_timeout` instead.
+    ///
+    /// `busy_timeout` (5 s) bounds a single wait, and SQLite's busy handler is
+    /// not fair: under heavy contention one writer can keep losing the race.
+    /// So a busy start is retried, for up to 30 s in all, instead of failing.
     fn write_tx(&mut self) -> Result<rusqlite::Transaction<'_>> {
-        Ok(self
-            .conn
-            .transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?)
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+        let mut attempt: u64 = 0;
+        loop {
+            match rusqlite::Transaction::new_unchecked(
+                &self.conn,
+                rusqlite::TransactionBehavior::Immediate,
+            ) {
+                Ok(tx) => return Ok(tx),
+                Err(e) if crate::db::is_busy(&e) && std::time::Instant::now() < deadline => {
+                    attempt += 1;
+                    // Short, slightly varied pause so retrying writers spread out.
+                    let jitter = (std::process::id() as u64 + attempt * 7) % 23;
+                    std::thread::sleep(std::time::Duration::from_millis(10 + jitter));
+                }
+                Err(e) => return Err(e.into()),
+            }
+        }
     }
 
     pub fn data_version(&self) -> Result<i64> {

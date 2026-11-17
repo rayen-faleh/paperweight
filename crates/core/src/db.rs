@@ -156,10 +156,15 @@ fn configure(conn: &Connection) -> Result<()> {
         }
     }
     conn.pragma_update(None, "foreign_keys", "ON")?;
+    // In WAL mode NORMAL is the recommended level: commits no longer wait for
+    // a disk flush (slow on Windows), so the write lock is held far shorter.
+    // The database stays consistent; only the last commits before a power
+    // cut can be lost.
+    conn.pragma_update(None, "synchronous", "NORMAL")?;
     Ok(())
 }
 
-fn is_busy(e: &rusqlite::Error) -> bool {
+pub(crate) fn is_busy(e: &rusqlite::Error) -> bool {
     matches!(
         e.sqlite_error_code(),
         Some(rusqlite::ErrorCode::DatabaseBusy) | Some(rusqlite::ErrorCode::DatabaseLocked)

@@ -776,3 +776,13 @@ fn reminder_sound_defaults_on_even_for_older_settings() {
     s.save_settings(&off).unwrap();
     assert!(!s.settings().unwrap().reminder_sound);
 }
+
+#[test]
+fn wal_uses_normal_sync() {
+    let (_d, s) = store();
+    let sync: i64 = s
+        .conn()
+        .query_row("PRAGMA synchronous", [], |r| r.get(0))
+        .unwrap();
+    assert_eq!(sync, 1, "NORMAL");
+}

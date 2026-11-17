@@ -76,3 +76,35 @@ fn concurrent_writes_from_separate_connections_all_succeed() {
     assert_eq!(s.reminder_log().unwrap().len(), THREADS * EACH);
     let _ = &mut s;
 }
+
+#[test]
+fn a_writer_waits_past_the_busy_timeout_instead_of_failing() {
+    let (_d, mut s) = store();
+    let path = s.path().to_path_buf();
+    let (locked_tx, locked_rx) = std::sync::mpsc::channel();
+    // Another process holds the write lock for longer than busy_timeout (5 s).
+    let holder = std::thread::spawn(move || {
+        let other = Store::open(&path).unwrap();
+        other.conn().execute_batch("BEGIN IMMEDIATE").unwrap();
+        locked_tx.send(()).unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(6500));
+        other.conn().execute_batch("COMMIT").unwrap();
+    });
+    locked_rx.recv().unwrap();
+    let start = std::time::Instant::now();
+    let item = s.add_item(
+        NewItem::new("Waited for the lock", tue_afternoon(), false),
+        tue_afternoon(),
+    );
+    let waited = start.elapsed();
+    holder.join().unwrap();
+    assert!(
+        item.is_ok(),
+        "write failed instead of waiting: {:?}",
+        item.err()
+    );
+    assert!(
+        waited.as_secs_f64() > 5.5,
+        "it really waited past busy_timeout ({waited:?})"
+    );
+}
